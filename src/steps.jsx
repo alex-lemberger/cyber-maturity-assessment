@@ -340,7 +340,7 @@ function Step_MaDomain({ state, set, activeId }) {
         </div>
         <div className="domain-header__right">
           <RatingBadge label={override ? override.rating : ds.label} score={override ? override.score : ds.score} />
-          {domainIndex > 0 ? (
+          {ds.answered === ds.total && ds.total > 0 ? (
             <MiniBtn onClick={openOverride}>
               <i className="fa-solid fa-user-pen" style={{ marginRight: 4 }} />UW Override
             </MiniBtn>
@@ -416,17 +416,6 @@ function Step_MaDomain({ state, set, activeId }) {
                 style={{ resize: "vertical", fontFamily: "inherit", fontSize: 13, padding: "8px 10px", border: "1px solid #d0d4dc", borderRadius: 4, width: "100%", boxSizing: "border-box" }}
               />
             </FilledField>
-            <div style={{ borderTop: "1px solid #eee", paddingTop: 12, fontSize: 12, color: "#888" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px" }}>
-                <span><strong>Type:</strong> {drawerQ.type || "—"}</span>
-                <span><strong>Multiplier:</strong> {drawerQ.multiplier}</span>
-                <span><strong>Cyber Services:</strong> {drawerQ.cyberServices || "—"}</span>
-                <span><strong>CSA Mapping:</strong> {drawerQ.csaMapping || "—"}</span>
-                <span><strong>CyQu Mapping:</strong> {drawerQ.cyquMapping || "—"}</span>
-                <span><strong>BI Severity:</strong> {drawerQ.biSeverity || "—"}</span>
-                <span><strong>BI Recovery:</strong> {drawerQ.biRecoveryTime || "—"}</span>
-              </div>
-            </div>
           </div>
         ) : null}
       </Drawer>
