@@ -649,6 +649,152 @@ function KeyControlsGauge({ kc }) {
   );
 }
 
+// ==========================================================================
+// MA Status Widget
+// ==========================================================================
+
+function MaStatusBar({ ma, maStatusVariant, setMaStatusVariant, onNavigate }) {
+  const answers = (ma && ma.answers) || {};
+  const businessSize = (ma && ma.businessSize) || "XL";
+  const includeOT = ma ? ma.includeOT !== false : true;
+  const uwOverrides = (ma && ma.uwOverrides) || {};
+
+  const overall = CALC.overallRating(answers, businessSize, includeOT, uwOverrides);
+  const answered = overall.totalAnswered || 0;
+  const total = overall.totalQuestions || 0;
+  const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+  const kc = overall.keyControls || {};
+  const kcTotal = (kc.fulfilled || 0) + (kc.partial || 0) + (kc.notFulfilled || 0) + (kc.noInfo || 0);
+  const kcPct = (n) => kcTotal > 0 ? `${((n / kcTotal) * 100).toFixed(1)}%` : "0%";
+
+  const isCompact = maStatusVariant === true;
+
+  return (
+    <div className={`ma-status-bar${isCompact ? " ma-status-bar--compact" : ""}`}>
+      <span className="ma-status-bar__label">Maturity Assessment</span>
+
+      {/* Progress */}
+      <div className="ma-status-bar__group">
+        <span className="ma-status-bar__count">{answered}/{total}</span>
+        <div className="ma-mini-bar">
+          <div className="ma-mini-bar__fill" style={{ width: `${pct}%` }} />
+        </div>
+        <span className="ma-status-bar__count" style={{ color: "var(--fg-muted)", fontSize: 11 }}>{pct}%</span>
+      </div>
+
+      <span className="ma-stat-divider" />
+
+      {/* Key Controls */}
+      <div className="ma-status-bar__group">
+        <span className="ma-status-bar__count">KC: {kc.fulfilled || 0}/{kcTotal}</span>
+        {kcTotal > 0 ? (
+          <div className="ma-mini-kc-bar">
+            {kc.fulfilled > 0 ? <div className="ma-mini-kc-bar__seg--ok" style={{ width: kcPct(kc.fulfilled) }} /> : null}
+            {kc.partial > 0 ? <div className="ma-mini-kc-bar__seg--partial" style={{ width: kcPct(kc.partial) }} /> : null}
+            {kc.notFulfilled > 0 ? <div className="ma-mini-kc-bar__seg--bad" style={{ width: kcPct(kc.notFulfilled) }} /> : null}
+            {kc.noInfo > 0 ? <div className="ma-mini-kc-bar__seg--none" style={{ width: kcPct(kc.noInfo) }} /> : null}
+          </div>
+        ) : null}
+      </div>
+
+      <span className="ma-stat-divider" />
+
+      {/* Overall rating */}
+      <div className="ma-status-bar__group">
+        <RatingBadge label={overall.label} score={overall.score} />
+      </div>
+
+      <span className="ma-status-bar__spacer" />
+
+      {/* Variant toggle */}
+      <button
+        className="ma-status-bar__toggle"
+        onClick={() => setMaStatusVariant(!maStatusVariant)}
+      >
+        {isCompact ? "‹ Hide details" : "Details ▸"}
+      </button>
+    </div>
+  );
+}
+
+function MaSidePanel({ ma, onNavigate, onHide }) {
+  const answers = (ma && ma.answers) || {};
+  const businessSize = (ma && ma.businessSize) || "XL";
+  const includeOT = ma ? ma.includeOT !== false : true;
+  const uwOverrides = (ma && ma.uwOverrides) || {};
+
+  const overall = CALC.overallRating(answers, businessSize, includeOT, uwOverrides);
+  const answered = overall.totalAnswered || 0;
+  const total = overall.totalQuestions || 0;
+  const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+  const kc = overall.keyControls || {};
+
+  // Rating dot colours
+  const ratingColor = {
+    "Advanced":     "#65a518",
+    "Progressive":  "#1565c0",
+    "Intermediate": "#b8860b",
+    "Basic":        "#aaa",
+  };
+
+  return (
+    <div className="ma-side-panel">
+      <div className="ma-side-panel__head">
+        <span className="ma-side-panel__title">MA Status</span>
+        <button className="ma-side-panel__hide" onClick={onHide}>‹ Hide</button>
+      </div>
+
+      {/* Overall */}
+      <div>
+        <RatingBadge label={overall.label} score={overall.score} />
+        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+          <div className="ma-mini-bar" style={{ width: "100%" }}>
+            <div className="ma-mini-bar__fill" style={{ width: `${pct}%` }} />
+          </div>
+          <span style={{ fontSize: 11, color: "var(--fg-muted)" }}>{answered}/{total} answered ({pct}%)</span>
+        </div>
+      </div>
+
+      {/* Key controls gauge */}
+      <div>
+        <div className="ma-side-panel__section-label">Key Controls</div>
+        <KeyControlsGauge kc={kc} />
+      </div>
+
+      {/* Per-domain rows (domains 1–9 only) */}
+      <div>
+        <div className="ma-side-panel__section-label">Domains</div>
+        {Array.from({ length: 9 }, (_, i) => i + 1).map((idx) => {
+          const ds = CALC.domainScore(idx, answers, businessSize, includeOT);
+          const override = (uwOverrides || {})[idx];
+          const label = override ? override.rating : ds.label;
+          const dotColor = ratingColor[label] || "#aaa";
+          const domainPct = ds.total > 0 ? Math.round((ds.answered / ds.total) * 100) : 0;
+          const shortName = DOMAIN_NAMES[idx]
+            ? DOMAIN_NAMES[idx].replace(/^\d+\.\s*/, "")
+            : `Domain ${idx}`;
+          return (
+            <div
+              key={idx}
+              className="ma-domain-row"
+              onClick={() => onNavigate && onNavigate("maDomain" + idx)}
+            >
+              <div className="ma-domain-row__head">
+                <span className="ma-domain-row__name" title={DOMAIN_NAMES[idx]}>{shortName}</span>
+                <span className="ma-domain-row__dot" style={{ background: dotColor }} title={label} />
+              </div>
+              <div className="ma-domain-row__bar">
+                <div className="ma-domain-row__bar-fill" style={{ width: `${domainPct}%` }} />
+              </div>
+              <span className="ma-domain-row__count">{ds.answered}/{ds.total}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 Object.assign(window, {
   Field, TextInput, NumberInput, Select, YesNo, Check,
   Section, Group, HelperBanner, InfoNote, MiniBtn, Tag,
@@ -657,4 +803,5 @@ Object.assign(window, {
   FilledInput, FilledNumber, FilledSelect, FilledYesNo, FilledRadio, FilledField, FilledDate,
   DrawerForm, DrawerFooter, NavDivider,
   AnswerBadge, RatingBadge, PillToggle, QuestionRow, DomainSummaryCard, KeyControlsGauge,
+  MaStatusBar, MaSidePanel,
 });

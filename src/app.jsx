@@ -18,6 +18,8 @@ function makeInitialState() {
       status: "Draft",
     },
 
+    maStatusVariant: false,  // false = sticky bar only; true = bar + side panel
+
     // Maturity Assessment state
     ma: {
       businessSize: "XL",
@@ -170,6 +172,7 @@ function App() {
   useEffect_app(() => { try { localStorage.setItem("cyber_ma_state_v1", JSON.stringify(state)); } catch (e) {} }, [state]);
 
   const setSlice = (slice) => { setState((s) => ({ ...s, ...slice })); };
+  const setMaStatusVariant = (v) => setState((s) => ({ ...s, maStatusVariant: v }));
 
   // Active step component
   const StepComp = STEP_COMP[activeId] || Step_GeneralData;
@@ -238,14 +241,27 @@ function App() {
           openGroups={openGroups}
           toggleGroup={(id) => setOpenGroups((g) => ({ ...g, [id]: !g[id] }))}
         />
-        <main className="main" data-screen-label={activeLabel}>
+        <main className={`main${state.maStatusVariant ? " main--with-panel" : ""}`} data-screen-label={activeLabel}>
           <div className="main__scroll">
             <div className="main__inner">
               <PartnerBanner state={state} />
+              {activeId.startsWith("ma") ? (
+                <MaStatusBar
+                  ma={state.ma}
+                  maStatusVariant={state.maStatusVariant}
+                  setMaStatusVariant={setMaStatusVariant}
+                />
+              ) : null}
               <StepComp state={state} set={setSlice} activeId={activeId} />
             </div>
           </div>
-          {/* Footer hidden — not in focus for this prototype */}
+          {state.maStatusVariant && activeId.startsWith("ma") ? (
+            <MaSidePanel
+              ma={state.ma}
+              onNavigate={(id) => { setActiveId(id); window.location.hash = id; ensureGroupOpen(id); }}
+              onHide={() => setMaStatusVariant(false)}
+            />
+          ) : null}
         </main>
       </div>
     </div>
