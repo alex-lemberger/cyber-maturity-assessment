@@ -1753,19 +1753,18 @@ button { font-family: inherit; }
    ========================================================================== */
 .ma-status-bar {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 0;
-  padding: 8px 16px;
+  height: 40px;
+  padding: 0 16px;
   background: var(--bg-elev);
   border: 1px solid var(--border-soft);
   border-radius: 6px;
   margin-bottom: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  flex-wrap: nowrap;
-  min-width: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 .ma-status-bar__label {
   font-size: 10.5px;
@@ -1852,9 +1851,9 @@ button { font-family: inherit; }
    MA Status Widget — Variant B (right side panel)
    ========================================================================== */
 .ma-status-bar--compact {
-  padding: 5px 12px;
+  height: 36px;
+  padding: 0 12px;
   margin-bottom: 12px;
-  gap: 0;
   border-radius: 4px;
 }
 .ma-side-panel {
@@ -1956,10 +1955,9 @@ button { font-family: inherit; }
   color: var(--fg-faint);
 }
 /* Layout: main area + side panel side by side */
-.main--with-panel {
-  display: flex;
+.layout > .main.main--with-panel {
   flex-direction: row;
-  min-width: 0;
+  align-items: stretch;
   overflow: hidden;
 }
 .main--with-panel .main__scroll {
