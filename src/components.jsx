@@ -728,6 +728,7 @@ function MaSidePanel({ ma, onNavigate, onHide }) {
   const total = overall.totalQuestions || 0;
   const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
   const kc = overall.keyControls || {};
+  const kcTotal = (kc.fulfilled || 0) + (kc.partial || 0) + (kc.notFulfilled || 0) + (kc.noInfo || 0);
 
   // Rating dot colours
   const ratingColor = {
@@ -739,57 +740,63 @@ function MaSidePanel({ ma, onNavigate, onHide }) {
 
   return (
     <div className="ma-side-panel">
+      {/* Header */}
       <div className="ma-side-panel__head">
         <span className="ma-side-panel__title">MA Status</span>
         <button className="ma-side-panel__hide" onClick={onHide}>‹ Hide</button>
       </div>
 
-      {/* Overall */}
-      <div>
+      {/* Overall rating + progress */}
+      <div className="ma-sp-section">
         <RatingBadge label={overall.label} score={overall.score} />
-        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-          <div className="ma-mini-bar" style={{ width: "100%" }}>
-            <div className="ma-mini-bar__fill" style={{ width: `${pct}%` }} />
-          </div>
-          <span style={{ fontSize: 11, color: "var(--fg-muted)" }}>{answered}/{total} answered ({pct}%)</span>
+        <span className="ma-sp-progress-text">{answered}/{total} answered ({pct}%)</span>
+        <div className="ma-sp-bar">
+          <div className="ma-sp-bar__fill" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
-      {/* Key controls gauge */}
-      <div>
+      {/* Key controls */}
+      <div className="ma-sp-section">
         <div className="ma-side-panel__section-label">Key Controls</div>
-        <KeyControlsGauge kc={kc} />
+        <div className="ma-sp-kc-bar">
+          {kc.fulfilled > 0 ? <div className="ma-sp-kc-bar__seg ma-sp-kc-bar__seg--ok" style={{ width: `${((kc.fulfilled / kcTotal) * 100).toFixed(1)}%` }} /> : null}
+          {kc.partial > 0 ? <div className="ma-sp-kc-bar__seg ma-sp-kc-bar__seg--partial" style={{ width: `${((kc.partial / kcTotal) * 100).toFixed(1)}%` }} /> : null}
+          {kc.notFulfilled > 0 ? <div className="ma-sp-kc-bar__seg ma-sp-kc-bar__seg--bad" style={{ width: `${((kc.notFulfilled / kcTotal) * 100).toFixed(1)}%` }} /> : null}
+          {kc.noInfo > 0 ? <div className="ma-sp-kc-bar__seg ma-sp-kc-bar__seg--none" style={{ width: `${((kc.noInfo / kcTotal) * 100).toFixed(1)}%` }} /> : null}
+        </div>
+        <div className="ma-sp-kc-legend">
+          <span className="ma-sp-kc-legend__item"><span className="kc-dot kc-dot--ok" /> Fulfilled ({kc.fulfilled || 0})</span>
+          <span className="ma-sp-kc-legend__item"><span className="kc-dot kc-dot--partial" /> Partial ({kc.partial || 0})</span>
+          <span className="ma-sp-kc-legend__item"><span className="kc-dot kc-dot--bad" /> Not fulfilled ({kc.notFulfilled || 0})</span>
+          <span className="ma-sp-kc-legend__item"><span className="kc-dot kc-dot--none" /> No info ({kc.noInfo || 0})</span>
+        </div>
       </div>
 
-      {/* Per-domain rows (domains 1–9 only) */}
-      <div>
+      {/* Per-domain rows (domains 1–9) */}
+      <div className="ma-sp-section">
         <div className="ma-side-panel__section-label">Domains</div>
-        {Array.from({ length: 9 }, (_, i) => i + 1).map((idx) => {
-          const ds = CALC.domainScore(idx, answers, businessSize, includeOT);
-          const override = (uwOverrides || {})[idx];
-          const label = override ? override.rating : ds.label;
-          const dotColor = ratingColor[label] || "#aaa";
-          const domainPct = ds.total > 0 ? Math.round((ds.answered / ds.total) * 100) : 0;
-          const shortName = DOMAIN_NAMES[idx]
-            ? DOMAIN_NAMES[idx].replace(/^\d+\.\s*/, "")
-            : `Domain ${idx}`;
-          return (
-            <div
-              key={idx}
-              className="ma-domain-row"
-              onClick={() => onNavigate && onNavigate("maDomain" + idx)}
-            >
-              <div className="ma-domain-row__head">
-                <span className="ma-domain-row__name" title={DOMAIN_NAMES[idx]}>{shortName}</span>
-                <span className="ma-domain-row__dot" style={{ background: dotColor }} title={label} />
+        <div className="ma-sp-domain-list">
+          {Array.from({ length: 9 }, (_, i) => i + 1).map((idx) => {
+            const ds = CALC.domainScore(idx, answers, businessSize, includeOT);
+            const override = (uwOverrides || {})[idx];
+            const label = override ? override.rating : ds.label;
+            const dotColor = ratingColor[label] || "#aaa";
+            const shortName = DOMAIN_NAMES[idx]
+              ? DOMAIN_NAMES[idx].replace(/^\d+\.\s*/, "")
+              : `Domain ${idx}`;
+            return (
+              <div
+                key={idx}
+                className="ma-sp-domain"
+                onClick={() => onNavigate && onNavigate("maDomain" + idx)}
+              >
+                <span className="ma-sp-domain__name" title={DOMAIN_NAMES[idx]}>{shortName}</span>
+                <span className="ma-sp-domain__count">{ds.answered}/{ds.total}</span>
+                <span className="ma-sp-domain__dot" style={{ background: dotColor }} title={label} />
               </div>
-              <div className="ma-domain-row__bar">
-                <div className="ma-domain-row__bar-fill" style={{ width: `${domainPct}%` }} />
-              </div>
-              <span className="ma-domain-row__count">{ds.answered}/{ds.total}</span>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

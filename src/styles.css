@@ -1746,7 +1746,6 @@ button { font-family: inherit; }
   .q-row__text { max-width: 200px; }
   .domain-header { flex-direction: column; align-items: flex-start; }
 }
-}
 
 /* ==========================================================================
    MA Status Widget — Variant A (sticky bar)
@@ -1865,13 +1864,13 @@ button { font-family: inherit; }
   flex-direction: column;
   overflow-y: auto;
   padding: 14px 14px 20px;
-  gap: 12px;
+  gap: 0;
 }
 .ma-side-panel__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2px;
+  margin-bottom: 14px;
 }
 .ma-side-panel__title {
   font-size: 11px;
@@ -1896,64 +1895,125 @@ button { font-family: inherit; }
   color: var(--fg);
 }
 .ma-side-panel__section-label {
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--fg-faint);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
-.ma-domain-row {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 4px 0;
+
+/* Panel sections */
+.ma-sp-section {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--border-soft);
-  cursor: pointer;
 }
-.ma-domain-row:last-child {
+.ma-sp-section:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
   border-bottom: none;
 }
-.ma-domain-row:hover .ma-domain-row__name {
-  color: var(--accent-ink);
+
+/* Progress text + bar in overall section */
+.ma-sp-progress-text {
+  display: block;
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
-.ma-domain-row__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-.ma-domain-row__name {
-  font-size: 11.5px;
-  color: var(--fg-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-  flex: 1;
-}
-.ma-domain-row__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.ma-domain-row__bar {
+.ma-sp-bar {
   height: 4px;
   border-radius: 2px;
   background: var(--bg-sunk);
   overflow: hidden;
 }
-.ma-domain-row__bar-fill {
+.ma-sp-bar__fill {
   height: 100%;
   border-radius: 2px;
   background: var(--accent);
-  transition: width 150ms;
+  transition: width 200ms;
 }
-.ma-domain-row__count {
+
+/* Key Controls compact gauge */
+.ma-sp-kc-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #eee;
+  margin-bottom: 6px;
+}
+.ma-sp-kc-bar__seg { height: 100%; }
+.ma-sp-kc-bar__seg--ok      { background: #65a518; }
+.ma-sp-kc-bar__seg--partial { background: #e6a817; }
+.ma-sp-kc-bar__seg--bad     { background: #e60018; }
+.ma-sp-kc-bar__seg--none    { background: #ccc; }
+
+.ma-sp-kc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
   font-size: 10px;
-  color: var(--fg-faint);
+  color: var(--fg-soft);
 }
+.ma-sp-kc-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* Domain list — single-line rows */
+.ma-sp-domain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.ma-sp-domain {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-soft);
+  cursor: pointer;
+  transition: background 80ms;
+}
+.ma-sp-domain:last-child {
+  border-bottom: none;
+}
+.ma-sp-domain:hover {
+  background: var(--bg-sunk);
+  margin: 0 -14px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.ma-sp-domain__name {
+  flex: 1;
+  font-size: 11.5px;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ma-sp-domain:hover .ma-sp-domain__name {
+  color: var(--accent-ink);
+}
+.ma-sp-domain__count {
+  font-size: 10px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.ma-sp-domain__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* Layout: main area + side panel side by side */
 .layout > .main.main--with-panel {
   flex-direction: row;
