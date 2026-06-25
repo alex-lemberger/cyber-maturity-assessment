@@ -490,6 +490,160 @@ function Step_MaDomain({ state, set, activeId }) {
   );
 }
 
+// ---- Inline-answer variant (direct dropdowns in card, no panel) ----
+// Used for domain 3 (Data Protection) as a UX experiment
+function Step_MaDomainInline({ state, set, activeId }) {
+  const ma = state.ma || {};
+  const answers = ma.answers || {};
+  const businessSize = ma.businessSize || "XL";
+  const includeOT = ma.includeOT !== false;
+  const setMa = (patch) => set({ ma: { ...ma, ...patch } });
+
+  const domainIndex = parseInt((activeId || "").replace("maDomain", ""), 10) || 0;
+  const visibleQuestions = CALC.getVisibleQuestions(domainIndex, businessSize, includeOT);
+  const ds = CALC.domainScore(domainIndex, answers, businessSize, includeOT);
+  const override = (ma.uwOverrides || {})[domainIndex];
+
+  // UW Override drawer (keep as drawer — rare action)
+  const [overrideOpen, setOverrideOpen] = useS(false);
+  const [overrideDraft, setOverrideDraft] = useS({});
+
+  const openOverride = () => {
+    const existing = override || {};
+    setOverrideDraft({ score: existing.score ?? "", rating: existing.rating || "", reasoning: existing.reasoning || "" });
+    setOverrideOpen(true);
+  };
+  const saveOverride = () => {
+    const newOverrides = { ...(ma.uwOverrides || {}), [domainIndex]: { score: overrideDraft.score, rating: overrideDraft.rating, reasoning: overrideDraft.reasoning } };
+    setMa({ uwOverrides: newOverrides });
+    setOverrideOpen(false);
+  };
+  const clearOverride = () => {
+    const newOverrides = { ...(ma.uwOverrides || {}) };
+    delete newOverrides[domainIndex];
+    setMa({ uwOverrides: newOverrides });
+    setOverrideOpen(false);
+  };
+
+  const setAnswer = (uid, value) => {
+    const existing = answers[uid] || {};
+    const newAnswers = { ...answers, [uid]: { ...existing, answer: value } };
+    setMa({ answers: newAnswers });
+  };
+
+  return (
+    <div className="step">
+      <div className="domain-header">
+        <div className="domain-header__left">
+          <h2 className="domain-header__title">{DOMAIN_NAMES[domainIndex]}</h2>
+          <span className="domain-header__count">{ds.answered}/{ds.total} answered</span>
+        </div>
+        <div className="domain-header__right">
+          <RatingBadge label={override ? override.rating : ds.label} score={override ? override.score : ds.score} />
+          {ds.answered === ds.total && ds.total > 0 ? (
+            <MiniBtn onClick={openOverride}>
+              <i className="fa-solid fa-user-pen" style={{ marginRight: 4 }} />UW Override
+            </MiniBtn>
+          ) : null}
+        </div>
+      </div>
+
+      {ds.keyControls.total > 0 ? (
+        <div style={{ marginBottom: 16 }}>
+          <KeyControlsGauge kc={ds.keyControls} />
+        </div>
+      ) : null}
+
+      <div className="dcard" style={{ padding: 0 }}>
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid #e0e4ea", fontSize: 12, color: "#888", display: "flex", gap: 16 }}>
+          <span>{visibleQuestions.length} questions</span>
+          <span>Size: {businessSize}</span>
+          {includeOT ? <span>OT: included</span> : null}
+        </div>
+        {visibleQuestions.length === 0 ? (
+          <div style={{ padding: "32px 16px", textAlign: "center", color: "#888" }}>
+            No questions visible for current filters.
+          </div>
+        ) : (
+          visibleQuestions.map((q) => {
+            const a = (answers[q.uid] || {}).answer || "";
+            return (
+              <div key={q.uid} className="sc-row">
+                <span className="sc-row__label">
+                  {q.type === "MinimumReq" && <span className="qi-row__kc" style={{ marginRight: 6 }}>KC</span>}
+                  {q.id} — {q.question}
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0, width: 280, justifyContent: "flex-end" }}>
+                  <select
+                    className="sc-row__select"
+                    value={a}
+                    onChange={(e) => setAnswer(q.uid, e.target.value)}
+                  >
+                    <option value="">— Select —</option>
+                    {ANSWER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <span style={{ minWidth: 80, textAlign: "right" }}>{a ? <AnswerBadge value={a} /> : null}</span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* UW Override Drawer */}
+      <Drawer
+        open={overrideOpen}
+        onClose={() => setOverrideOpen(false)}
+        title="UW Override"
+        width={400}
+        footer={
+          <div className="drawer-foot">
+            <button className="btn btn--accent" onClick={saveOverride}>Save Override</button>
+            {override ? <button className="btn btn--outline" style={{ color: "#e60018", borderColor: "#e60018" }} onClick={clearOverride}>Clear Override</button> : null}
+            <button className="btn btn--outline" onClick={() => setOverrideOpen(false)}>Cancel</button>
+          </div>
+        }
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <FilledField label="Override Score (0–4)">
+            <FilledNumber
+              value={overrideDraft.score}
+              onChange={(v) => {
+                const num = Number(v);
+                setOverrideDraft({ ...overrideDraft, score: v === "" ? "" : num, rating: v === "" ? "" : CALC.getRatingLabel(num) });
+              }}
+              min={0}
+              max={4}
+              placeholder="0.00 – 4.00"
+            />
+          </FilledField>
+          <FilledField label="Rating">
+            <FilledSelect
+              value={overrideDraft.rating}
+              onChange={(v) => setOverrideDraft({ ...overrideDraft, rating: v })}
+              options={["Basic", "Intermediate", "Progressive", "Advanced"]}
+              placeholder="Auto from score"
+            />
+          </FilledField>
+          <FilledField label="Reasoning">
+            <textarea
+              className="finput__el"
+              rows={4}
+              value={overrideDraft.reasoning}
+              onChange={(e) => setOverrideDraft({ ...overrideDraft, reasoning: e.target.value })}
+              placeholder="Explain your override…"
+              style={{ resize: "vertical", fontFamily: "inherit", fontSize: 13, padding: "8px 10px", border: "1px solid #d0d4dc", borderRadius: 4, width: "100%", boxSizing: "border-box" }}
+            />
+          </FilledField>
+          <div style={{ fontSize: 12, color: "#888" }}>
+            Calculated score: <strong>{ds.score.toFixed(2)}</strong> ({ds.label})
+          </div>
+        </div>
+      </Drawer>
+    </div>
+  );
+}
+
 // ---- Risk Profile > Maturity Assessment: BI Assessment ----
 function Step_MaBiAssessment({ state, set }) {
   const bi = state.bi || {};

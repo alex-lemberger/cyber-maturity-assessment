@@ -89,7 +89,7 @@ const STEP_COMP = {
   maDomain0:       Step_MaDomain,
   maDomain1:       Step_MaDomain,
   maDomain2:       Step_MaDomain,
-  maDomain3:       Step_MaDomain,
+  maDomain3:       Step_MaDomainInline,
   maDomain4:       Step_MaDomain,
   maDomain5:       Step_MaDomain,
   maDomain6:       Step_MaDomain,
