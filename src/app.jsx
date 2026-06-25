@@ -30,15 +30,15 @@ function makeInitialState() {
     // BI Assessment state
     bi: {
       year: 2026,
-      turnover: 0,
-      turnoverTrend: 0,
-      profitMargin: 0,
-      fixCosts: 0,
-      otherCosts: 0,
-      deductible: 0,
-      limit: 0,
-      waitingPeriod: false,
-      waitingPeriodHours: 0,
+      turnover: 450000000,
+      turnoverTrend: 3,
+      profitMargin: 14,
+      fixCosts: 28,
+      otherCosts: 1200000,
+      deductible: 500000,
+      limit: 10000000,
+      waitingPeriod: true,
+      waitingPeriodHours: 12,
     },
   };
 }
