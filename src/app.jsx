@@ -51,7 +51,7 @@ const NAV = [
     { id: "exposureProfile",   label: "General Exposure Profile" },
     { id: "riskAssessment",    label: "Risk Assessment" },
     { id: "exclusionsReview",  label: "Exclusions Review" },
-    { id: "standardsCerts",    label: "Standards & Certifications", done: true },
+    { id: "standardsCerts",    label: "Standards & Certifications" },
     { id: "maturityAssessment", label: "Maturity Assessment", group: true, children: [
       { id: "maOverview",      label: "Overview" },
       { id: "maDomain0",      label: "Additional Information" },
@@ -237,6 +237,7 @@ function App() {
         <Sidebar
           nav={NAV}
           activeId={activeId}
+          state={state}
           onPick={(id) => { setActiveId(id); window.location.hash = id; ensureGroupOpen(id); }}
           openGroups={openGroups}
           toggleGroup={(id) => setOpenGroups((g) => ({ ...g, [id]: !g[id] }))}
@@ -292,7 +293,42 @@ function Header() {
 }
 
 // ---- Sidebar ----
-function Sidebar({ nav, activeId, onPick, openGroups, toggleGroup }) {
+function Sidebar({ nav, activeId, state, onPick, openGroups, toggleGroup }) {
+
+  // Compute dynamic done states
+  const STANDARDS_LIST = [
+    "Payment Card Industry Data Security Standard (PCI DSS)",
+    "ISO 27001 : 2013 Information Security Management Systems",
+    "COBIT 5 (Control Objectives for Information and Related Technologies)",
+    "Information Security Forum (ISF) The Standard of Good Practice for IS 2018",
+    "Business Sector Specific Standards (e.g. TISAX)",
+    "NIST Cybersecurity Framework",
+    "Critical Security Controls",
+    "BSI Baseline Protection 100-x",
+    "ISO/IEC 27031 Business Continuity",
+  ];
+  const certs = state.standardsCerts || {};
+  const standardsCertsDone = STANDARDS_LIST.every(s => certs[s] && certs[s] !== "");
+
+  // MA domain done = all visible questions answered
+  const ma = state.ma || {};
+  const answers = ma.answers || {};
+  const businessSize = ma.businessSize || "XL";
+  const includeOT = ma.includeOT !== false;
+
+  const isDomainDone = (domain) => {
+    const visible = CALC.getVisibleQuestions(domain, businessSize, includeOT);
+    if (visible.length === 0) return false;
+    return visible.every(q => answers[q.uid] && answers[q.uid].answer);
+  };
+
+  const isDone = (id) => {
+    if (id === "standardsCerts") return standardsCertsDone;
+    // maDomain0 ... maDomain9
+    const domainMatch = id.match(/^maDomain(\d+)$/);
+    if (domainMatch) return isDomainDone(parseInt(domainMatch[1], 10));
+    return false;
+  };
 
   // Render nested children (e.g. Maturity Assessment sub-items)
   const renderChildren = (children, depth = 1) => {
@@ -307,7 +343,7 @@ function Sidebar({ nav, activeId, onPick, openGroups, toggleGroup }) {
                   className={`nav-item ${activeId === c.id ? "is-active" : ""}`}
                   onClick={() => { toggleGroup(c.id); onPick(c.id); }}
                 >
-                  <span className={`nav-dot ${c.done ? "nav-dot--done" : ""}`} />
+                  <span className={`nav-dot ${isDone(c.id) ? "nav-dot--done" : ""}`} />
                   <span className="nav-item__label">{c.label}</span>
                   <span className="nav-group__chev"><Icon name="chev-down" size={10} /></span>
                 </div>
@@ -321,7 +357,7 @@ function Sidebar({ nav, activeId, onPick, openGroups, toggleGroup }) {
               className={`nav-item ${activeId === c.id ? "is-active" : ""}`}
               onClick={() => onPick(c.id)}
             >
-              <span className={`nav-dot ${c.done ? "nav-dot--done" : ""}`} />
+              <span className={`nav-dot ${isDone(c.id) ? "nav-dot--done" : ""}`} />
               <span className="nav-item__label">{c.label}</span>
             </li>
           );

@@ -196,10 +196,18 @@ button { font-family: inherit; }
   flex-shrink: 0; background: var(--bg-elev);
   position: relative;
   transition: border-color 100ms;
+  display: flex; align-items: center; justify-content: center;
 }
 .nav-dot--done {
   background: var(--accent);
   border-color: var(--accent);
+}
+.nav-dot--done::after {
+  content: "\f00c";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 9px;
+  color: #fff;
 }
 
 .nav-group__icon {
@@ -2024,4 +2032,27 @@ button { font-family: inherit; }
 .main--with-panel .main__scroll {
   flex: 1;
   min-width: 0;
+}
+
+/* ---- Standards & Certifications rows ---- */
+.sc-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sc-row:last-child { border-bottom: none; }
+.sc-row__label {
+  font-size: 13px; color: var(--fg); font-weight: 500;
+  flex: 1; min-width: 0;
+}
+.sc-row__select {
+  width: 200px; padding: 6px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px; font-size: 13px;
+  background: var(--bg-elev); color: var(--fg);
+  cursor: pointer;
+}
+.sc-row__select:focus {
+  outline: none;
+  border-color: var(--accent);
 }

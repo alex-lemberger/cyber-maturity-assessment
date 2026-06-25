@@ -208,12 +208,28 @@ function Step_StandardsCerts({ state, set }) {
     "BSI Baseline Protection 100-x",
     "ISO/IEC 27031 Business Continuity",
   ];
+  const OPTIONS = ["Not implemented", "Partially implemented", "Fully implemented", "Not applicable"];
+  const certs = state.standardsCerts || {};
+  const setCert = (key, val) => set({ standardsCerts: { ...certs, [key]: val } });
+
   return (
     <div className="step">
-      <DisplayCard title="Standards & Certifications" onEdit={() => {}}>
-        {standards.map((s) => (
-          <DisplayField key={s} label={s} value="Not implemented" />
-        ))}
+      <DisplayCard title="Standards & Certifications" grid={false}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {standards.map((s, i) => (
+            <div key={i} className="sc-row">
+              <span className="sc-row__label">{s}</span>
+              <select
+                className="sc-row__select"
+                value={certs[s] || ""}
+                onChange={(e) => setCert(s, e.target.value)}
+              >
+                <option value="">— Select —</option>
+                {OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+          ))}
+        </div>
       </DisplayCard>
     </div>
   );
