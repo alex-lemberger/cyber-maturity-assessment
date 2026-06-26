@@ -76,6 +76,7 @@ const NAV = [
   ]},
   { id: "submitOffers",        label: "Submit Offer(s)",         icon: "list" },
   { id: "conclusion",          label: "Conclusion",             icon: "file" },
+  { id: "questionMgmt", label: "Question Management", icon: "gear", superuserOnly: true },
 ];
 
 const STEP_COMP = {
@@ -105,6 +106,7 @@ const STEP_COMP = {
   premiumResult:      Step_PremiumResult,
   submitOffers:       Step_SubmitOffers,
   conclusion:         Step_Conclusion,
+  questionMgmt:       Step_QuestionMgmt,
 };
 
 // All flat (ordered) IDs for prev/next nav
@@ -161,6 +163,15 @@ function App() {
   }, []);
 
   const [openGroups, setOpenGroups] = useState_app({ riskProfile: true, maturityAssessment: true });
+
+  const [role, setRole] = useState_app(() => {
+    try { return localStorage.getItem("cyber_ma_role") || "uw"; } catch (e) { return "uw"; }
+  });
+  const toggleRole = () => {
+    const next = role === "uw" ? "superuser" : "uw";
+    setRole(next);
+    try { localStorage.setItem("cyber_ma_role", next); } catch (e) {}
+  };
 
   // Persist
   useEffect_app(() => {
@@ -232,12 +243,13 @@ function App() {
 
   return (
     <div className="app">
-      <Header />
+      <Header role={role} toggleRole={toggleRole} />
       <div className="layout">
         <Sidebar
           nav={NAV}
           activeId={activeId}
           state={state}
+          role={role}
           onPick={(id) => { setActiveId(id); window.location.hash = id; ensureGroupOpen(id); }}
           openGroups={openGroups}
           toggleGroup={(id) => setOpenGroups((g) => ({ ...g, [id]: !g[id] }))}
@@ -270,7 +282,7 @@ function App() {
 }
 
 // ---- Header ----
-function Header() {
+function Header({ role, toggleRole }) {
   return (
     <header className="header">
       <div className="header__l">
@@ -281,6 +293,7 @@ function Header() {
         </a>
       </div>
       <div className="header__r">
+        <RoleToggle role={role} onToggle={toggleRole} />
         <a className="header-link" href="#"><Icon name="feedback" size={14} /> Feedback</a>
         <a className="header-link" href="#"><Icon name="links" size={14} /> Links</a>
         <a className="header-user" href="#">
@@ -293,7 +306,7 @@ function Header() {
 }
 
 // ---- Sidebar ----
-function Sidebar({ nav, activeId, state, onPick, openGroups, toggleGroup }) {
+function Sidebar({ nav, activeId, state, role, onPick, openGroups, toggleGroup }) {
 
   // Compute dynamic done states
   const STANDARDS_LIST = [
@@ -367,6 +380,7 @@ function Sidebar({ nav, activeId, state, onPick, openGroups, toggleGroup }) {
   };
 
   const renderNavItem = (n) => {
+    if (n.superuserOnly && role !== "superuser") return null;
     if (n.group) {
       const isOpen = openGroups[n.id];
       return (
