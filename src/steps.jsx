@@ -1118,31 +1118,41 @@ function Step_QuestionMgmt() {
       </div>
 
       {/* Table */}
-      <div style={{ overflowX: "auto" }}>
-        <table className="grid-tbl" style={{ fontSize: 12 }}>
+      <div>
+        <table className="grid-tbl" style={{ fontSize: 12, width: "100%", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "4%" }} />
+            <col style={{ width: "56%" }} />
+            <col style={{ width: "7%" }} />
+            <col style={{ width: "7%" }} />
+            <col style={{ width: "6%" }} />
+            <col style={{ width: "20%" }} />
+          </colgroup>
           <thead>
             <tr>
-              <th style={{ width: 50 }}>ID</th>
+              <th>ID</th>
               <th>Question</th>
-              <th style={{ width: 100 }}>Type</th>
-              <th style={{ width: 80 }}>Sizes</th>
-              <th style={{ width: 60 }}>Mult.</th>
-              <th style={{ width: 120 }}>Actions</th>
+              <th>Type</th>
+              <th>Sizes</th>
+              <th>Mult.</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((q) => (
               <tr key={q.uid}>
                 <td>{q.id}</td>
-                <td title={q.question}>{q.question.length > 80 ? q.question.slice(0, 80) + "..." : q.question}</td>
+                <td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{q.question}</td>
                 <td><span className={`qm-type ${q.type === "MinimumReq" ? "qm-type--min" : q.type === "ProgressiveReq" ? "qm-type--prog" : ""}`}>{q.type === "MinimumReq" ? "KC" : q.type === "ProgressiveReq" ? "Prog" : "—"}</span></td>
                 <td>{(q.sizes || []).join(", ") || "All"}</td>
                 <td>{q.multiplier}</td>
-                <td className="qm-actions">
-                  <button className="qm-btn" onClick={() => openEdit(q)} title="Edit"><i className="fa-solid fa-pen" /></button>
-                  <button className="qm-btn qm-btn--danger" onClick={() => setConfirmDelete(q.uid)} title="Delete"><i className="fa-solid fa-trash" /></button>
-                  <button className="qm-btn" onClick={() => moveUp(q.uid)} title="Move up"><i className="fa-solid fa-arrow-up" /></button>
-                  <button className="qm-btn" onClick={() => moveDown(q.uid)} title="Move down"><i className="fa-solid fa-arrow-down" /></button>
+                <td>
+                  <div className="qm-actions">
+                    <button className="qm-btn" onClick={() => openEdit(q)} title="Edit"><i className="fa-solid fa-pen" /></button>
+                    <button className="qm-btn qm-btn--danger" onClick={() => setConfirmDelete(q.uid)} title="Delete"><i className="fa-solid fa-trash" /></button>
+                    <button className="qm-btn" onClick={() => moveUp(q.uid)} title="Move up"><i className="fa-solid fa-arrow-up" /></button>
+                    <button className="qm-btn" onClick={() => moveDown(q.uid)} title="Move down"><i className="fa-solid fa-arrow-down" /></button>
+                  </div>
                 </td>
               </tr>
             ))}

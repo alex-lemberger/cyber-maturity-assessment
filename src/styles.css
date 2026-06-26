@@ -2157,6 +2157,7 @@ button { font-family: inherit; }
 }
 .qm-tab:hover { background: #f5f5f5; }
 .qm-tab--active { background: #65a518; color: #fff; border-color: #65a518; }
+.qm-tab:active { color: #000; }
 
 .qm-type {
   display: inline-block;
@@ -2170,11 +2171,13 @@ button { font-family: inherit; }
 
 .qm-actions {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  flex-wrap: nowrap;
+  align-items: center;
 }
 .qm-btn {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border: 1px solid #e0e4ea;
   border-radius: 4px;
   background: #fff;

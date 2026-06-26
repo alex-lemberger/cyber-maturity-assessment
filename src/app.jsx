@@ -69,6 +69,7 @@ const NAV = [
     ]},
     { id: "partyExposure",     label: "Party Exposure & Hazard Groups" },
   ]},
+  { id: "questionMgmt", label: "Question Management", icon: "settings", superuserOnly: true },
   { id: "programCoverage",     label: "Program Coverage",        icon: "puzzle" },
   { id: "costData",            label: "Cost Data",               icon: "credit-card" },
   { id: "calcAdjustment",      label: "Calculation / Adjustment", icon: "sliders", group: true, children: [
@@ -76,7 +77,6 @@ const NAV = [
   ]},
   { id: "submitOffers",        label: "Submit Offer(s)",         icon: "list" },
   { id: "conclusion",          label: "Conclusion",             icon: "file" },
-  { id: "questionMgmt", label: "Question Management", icon: "gear", superuserOnly: true },
 ];
 
 const STEP_COMP = {
