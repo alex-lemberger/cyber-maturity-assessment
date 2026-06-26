@@ -560,7 +560,7 @@ function RatingBadge({ label, score }) {
   const c = colors[label] || colors["Basic"];
   return (
     <span className="rating-badge" style={{ background: c.bg, color: c.fg }}>
-      {score != null ? <span className="rating-badge__score">{score.toFixed(2)}</span> : null}
+      {score != null ? <span className="rating-badge__score">{Number(score).toFixed(2)}</span> : null}
       {label}
     </span>
   );

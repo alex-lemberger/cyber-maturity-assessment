@@ -54,6 +54,7 @@ const NAV = [
     { id: "standardsCerts",    label: "Standards & Certifications" },
     { id: "maturityAssessment", label: "Maturity Assessment", group: true, children: [
       { id: "maOverview",      label: "Overview" },
+      { id: "maAiImport",     label: "AI Import" },
       { id: "maDomain0",      label: "Additional Information" },
       { id: "maDomain1",      label: "1. Info Security Org" },
       { id: "maDomain2",      label: "2. Managing Data" },
@@ -65,7 +66,6 @@ const NAV = [
       { id: "maDomain8",      label: "8. Incident / BCM" },
       { id: "maDomain9",      label: "9. External Providers" },
       { id: "maBiAssessment", label: "BI Assessment" },
-      { id: "maAiImport",     label: "AI Import" },
     ]},
     { id: "partyExposure",     label: "Party Exposure & Hazard Groups" },
   ]},
@@ -146,7 +146,7 @@ function App() {
   const [state, setState] = useState_app(makeInitialState);
   const [activeId, setActiveId] = useState_app(() => {
     const hash = window.location.hash.replace("#", "");
-    return (hash && STEP_COMP[hash]) ? hash : "generalData";
+    return (hash && STEP_COMP[hash]) ? hash : "maOverview";
   });
 
   // Sync hash to activeId on load (browser back/forward)
@@ -154,7 +154,7 @@ function App() {
     const onHashChange = () => {
       const hash = window.location.hash.replace("#", "");
       if (hash && STEP_COMP[hash]) setActiveId(hash);
-      else setActiveId("generalData");
+      else setActiveId("maOverview");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);

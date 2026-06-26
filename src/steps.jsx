@@ -452,15 +452,14 @@ function Step_MaDomain({ state, set, activeId }) {
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <FilledField label="Override Score (0–4)">
-            <FilledNumber
-              value={overrideDraft.score}
+            <FilledSelect
+              value={overrideDraft.score === "" ? "" : String(overrideDraft.score)}
               onChange={(v) => {
                 const num = Number(v);
                 setOverrideDraft({ ...overrideDraft, score: v === "" ? "" : num, rating: v === "" ? "" : CALC.getRatingLabel(num) });
               }}
-              min={0}
-              max={4}
-              placeholder="0.00 – 4.00"
+              options={["0", "1", "2", "3", "4"]}
+              placeholder="Select score"
             />
           </FilledField>
           <FilledField label="Rating">
@@ -606,15 +605,14 @@ function Step_MaDomainInline({ state, set, activeId }) {
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <FilledField label="Override Score (0–4)">
-            <FilledNumber
-              value={overrideDraft.score}
+            <FilledSelect
+              value={overrideDraft.score === "" ? "" : String(overrideDraft.score)}
               onChange={(v) => {
                 const num = Number(v);
                 setOverrideDraft({ ...overrideDraft, score: v === "" ? "" : num, rating: v === "" ? "" : CALC.getRatingLabel(num) });
               }}
-              min={0}
-              max={4}
-              placeholder="0.00 – 4.00"
+              options={["0", "1", "2", "3", "4"]}
+              placeholder="Select score"
             />
           </FilledField>
           <FilledField label="Rating">
@@ -719,7 +717,7 @@ function Step_MaBiAssessment({ state, set }) {
       >
         <DrawerForm cols={1}>
           <FilledField label="Year">
-            <FilledNumber value={draft.year} onChange={(v) => setDraft({ ...draft, year: v })} placeholder="2026" />
+            <FilledSelect value={draft.year ? String(draft.year) : ""} onChange={(v) => setDraft({ ...draft, year: v })} options={["2024", "2025", "2026", "2027", "2028"]} placeholder="Select year" />
           </FilledField>
           <FilledField label="Turnover">
             <FilledNumber value={draft.turnover} onChange={(v) => setDraft({ ...draft, turnover: v })} placeholder="e.g. 500000000" />
