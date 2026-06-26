@@ -683,7 +683,7 @@ function Step_MaBiAssessment({ state, set }) {
               <span><strong>Per Day:</strong> {fmtMio(result.perDay)}</span>
             </div>
             <div style={{ overflowX: "auto" }}>
-              <table className="grid-tbl" style={{ fontSize: 12 }}>
+              <table className="grid-tbl" style={{ fontSize: 11 }}>
                 <thead>
                   <tr>
                     <th>Scenario</th>
