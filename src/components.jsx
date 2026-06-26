@@ -802,6 +802,20 @@ function MaSidePanel({ ma, onNavigate, onHide }) {
   );
 }
 
+// ---- Role Toggle ----
+function RoleToggle({ role, onToggle }) {
+  const isSuperUser = role === "superuser";
+  return (
+    <div className="role-toggle" onClick={onToggle} title={isSuperUser ? "Switch to UW mode" : "Switch to Super User mode"}>
+      <span className={`role-toggle__label ${!isSuperUser ? "role-toggle__label--active" : ""}`}>UW</span>
+      <div className={`role-toggle__track ${isSuperUser ? "role-toggle__track--on" : ""}`}>
+        <div className="role-toggle__thumb" />
+      </div>
+      <span className={`role-toggle__label ${isSuperUser ? "role-toggle__label--active" : ""}`}>Super User</span>
+    </div>
+  );
+}
+
 Object.assign(window, {
   Field, TextInput, NumberInput, Select, YesNo, Check,
   Section, Group, HelperBanner, InfoNote, MiniBtn, Tag,
@@ -810,5 +824,5 @@ Object.assign(window, {
   FilledInput, FilledNumber, FilledSelect, FilledYesNo, FilledRadio, FilledField, FilledDate,
   DrawerForm, DrawerFooter, NavDivider,
   AnswerBadge, RatingBadge, PillToggle, QuestionRow, DomainSummaryCard, KeyControlsGauge,
-  MaStatusBar, MaSidePanel,
+  MaStatusBar, MaSidePanel, RoleToggle,
 });

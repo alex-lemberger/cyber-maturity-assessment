@@ -2096,3 +2096,43 @@ button { font-family: inherit; }
   outline: none;
   border-color: var(--accent);
 }
+
+/* ---- Role Toggle ---- */
+.role-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+.role-toggle:hover { background: rgba(0,0,0,0.04); }
+.role-toggle__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+  transition: color 0.15s;
+}
+.role-toggle__label--active { color: #333; font-weight: 600; }
+.role-toggle__track {
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: #ccc;
+  position: relative;
+  transition: background 0.15s;
+}
+.role-toggle__track--on { background: #65a518; }
+.role-toggle__thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: left 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.role-toggle__track--on .role-toggle__thumb { left: 16px; }
