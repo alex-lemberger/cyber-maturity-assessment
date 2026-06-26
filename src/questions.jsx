@@ -142,6 +142,40 @@ const QUESTIONS = [
   {"uid": 134, "domain": 9, "id": "9.5", "question": "Is a formal third‑party risk management (TPRM) programme or framework in place that covers both IT and non-IT suppliers?", "type": "ProgressiveReq", "sizes": [], "multiplier": 1.0, "isOT": false, "biSeverity": null, "biRecoveryTime": null, "cyberServices": "1:1", "csaMapping": "16.1.3, 16.2.3, 16.2.4", "cyquMapping": null},
 ];
 
+// --- Active questions layer (mutable, localStorage-backed) ---
+let _activeQuestions = null;
+
+function initActiveQuestions() {
+  try {
+    const saved = localStorage.getItem("cyber_ma_questions_v1");
+    if (saved) {
+      _activeQuestions = JSON.parse(saved);
+      return;
+    }
+  } catch (e) {}
+  _activeQuestions = JSON.parse(JSON.stringify(QUESTIONS)); // deep copy baseline
+}
+
+function getActiveQuestions() {
+  if (!_activeQuestions) initActiveQuestions();
+  return _activeQuestions;
+}
+
+function setActiveQuestions(arr) {
+  _activeQuestions = arr;
+  try { localStorage.setItem("cyber_ma_questions_v1", JSON.stringify(arr)); } catch (e) {}
+}
+
+function resetQuestions() {
+  localStorage.removeItem("cyber_ma_questions_v1");
+  _activeQuestions = JSON.parse(JSON.stringify(QUESTIONS));
+}
+
+function nextUid() {
+  const max = getActiveQuestions().reduce((m, q) => Math.max(m, q.uid), 0);
+  return max + 1;
+}
+
 const DOMAIN_NAMES = [
   "0. Additional Information",
   "1. Information Security Organisation",
