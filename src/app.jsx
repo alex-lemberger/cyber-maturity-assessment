@@ -45,13 +45,7 @@ function makeInitialState() {
 
 // ---- Navigation tree (matches the live cyber app) ----
 const NAV = [
-  { id: "generalData", label: "General Data", icon: "id-card" },
   { id: "riskProfile", label: "Risk Profile", icon: "shield", group: true, children: [
-    { id: "generalInfo",       label: "General Information" },
-    { id: "exposureProfile",   label: "General Exposure Profile" },
-    { id: "riskAssessment",    label: "Risk Assessment" },
-    { id: "exclusionsReview",  label: "Exclusions Review" },
-    { id: "standardsCerts",    label: "Standards & Certifications" },
     { id: "maturityAssessment", label: "Maturity Assessment", group: true, children: [
       { id: "maOverview",      label: "Overview" },
       { id: "maAiImport",     label: "AI Import" },
@@ -67,16 +61,8 @@ const NAV = [
       { id: "maDomain9",      label: "9. External Providers" },
       { id: "maBiAssessment", label: "BI Assessment" },
     ]},
-    { id: "partyExposure",     label: "Party Exposure & Hazard Groups" },
   ]},
   { id: "questionMgmt", label: "Question Management", icon: "settings", superuserOnly: true },
-  { id: "programCoverage",     label: "Program Coverage",        icon: "puzzle" },
-  { id: "costData",            label: "Cost Data",               icon: "credit-card" },
-  { id: "calcAdjustment",      label: "Calculation / Adjustment", icon: "sliders", group: true, children: [
-    { id: "premiumResult", label: "Premium Result" },
-  ]},
-  { id: "submitOffers",        label: "Submit Offer(s)",         icon: "list" },
-  { id: "conclusion",          label: "Conclusion",             icon: "file" },
 ];
 
 const STEP_COMP = {
