@@ -14,7 +14,7 @@ window.CALC = (function () {
   }
 
   function getVisibleQuestions(domain, businessSize, includeOT) {
-    return QUESTIONS.filter(function (q) {
+    return getActiveQuestions().filter(function (q) {
       if (q.domain !== domain) return false;
       if (!includeOT && q.isOT) return false;
       // Domain 0: no size filter
