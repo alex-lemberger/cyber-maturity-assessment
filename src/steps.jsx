@@ -268,7 +268,7 @@ function Step_MaOverview({ state, set }) {
 
       <DisplayCard title="Key Controls" grid={false}>
         <KeyControlsGauge kc={overall.keyControls} />
-        <div style={{ padding: "8px 16px 12px", fontSize: 13, color: "#666" }}>
+        <div style={{ padding: "16px 16px 12px 0", fontSize: 13, color: "#666" }}>
           {overall.kcLabel === "Fulfilled"
             ? <span style={{ color: "#2e7d0e" }}><i className="fa-solid fa-circle-check" style={{ marginRight: 6 }} />All key controls fulfilled</span>
             : <span style={{ color: "#e60018" }}><i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 6 }} />Key controls not fully satisfied</span>
