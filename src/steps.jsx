@@ -975,3 +975,253 @@ function Step_Conclusion({ state, set }) {
     </div>
   );
 }
+
+
+// ---- Question Management (Super User only) ----
+function Step_QuestionMgmt() {
+  const [questions, setQuestionsState] = useS(() => getActiveQuestions());
+  const [filterDomain, setFilterDomain] = useS("all");
+  const [drawerOpen, setDrawerOpen] = useS(false);
+  const [draft, setDraft] = useS({});
+  const [editUid, setEditUid] = useS(null); // null = add mode, uid = edit mode
+  const [confirmDelete, setConfirmDelete] = useS(null); // uid to delete
+
+  const persist = (arr) => {
+    setQuestionsState(arr);
+    setActiveQuestions(arr);
+  };
+
+  const filtered = filterDomain === "all"
+    ? questions
+    : questions.filter((q) => q.domain === Number(filterDomain));
+
+  // --- CRUD ---
+  const openAdd = () => {
+    setEditUid(null);
+    setDraft({
+      domain: filterDomain === "all" ? 0 : Number(filterDomain),
+      id: "",
+      question: "",
+      type: "",
+      sizes: [],
+      multiplier: 1.0,
+      isOT: false,
+    });
+    setDrawerOpen(true);
+  };
+
+  const openEdit = (q) => {
+    setEditUid(q.uid);
+    setDraft({
+      domain: q.domain,
+      id: q.id,
+      question: q.question,
+      type: q.type || "",
+      sizes: q.sizes || [],
+      multiplier: q.multiplier,
+      isOT: q.isOT || false,
+    });
+    setDrawerOpen(true);
+  };
+
+  const saveDrawer = () => {
+    let arr;
+    if (editUid != null) {
+      // Edit existing
+      arr = questions.map((q) =>
+        q.uid === editUid
+          ? { ...q, domain: draft.domain, id: draft.id, question: draft.question, type: draft.type || null, sizes: draft.sizes, multiplier: Number(draft.multiplier) || 1.0, isOT: draft.isOT }
+          : q
+      );
+    } else {
+      // Add new
+      const newQ = {
+        uid: nextUid(),
+        domain: Number(draft.domain),
+        id: draft.id,
+        question: draft.question,
+        type: draft.type || null,
+        sizes: draft.sizes,
+        multiplier: Number(draft.multiplier) || 1.0,
+        isOT: draft.isOT,
+        biSeverity: null,
+        biRecoveryTime: null,
+        cyberServices: null,
+        csaMapping: null,
+        cyquMapping: null,
+      };
+      arr = [...questions, newQ];
+    }
+    persist(arr);
+    setDrawerOpen(false);
+  };
+
+  const doDelete = () => {
+    const arr = questions.filter((q) => q.uid !== confirmDelete);
+    persist(arr);
+    setConfirmDelete(null);
+  };
+
+  const moveUp = (uid) => {
+    const idx = questions.findIndex((q) => q.uid === uid);
+    if (idx <= 0) return;
+    // Only swap within same domain
+    const q = questions[idx];
+    const prev = questions[idx - 1];
+    if (prev.domain !== q.domain) return;
+    const arr = [...questions];
+    arr[idx - 1] = q;
+    arr[idx] = prev;
+    persist(arr);
+  };
+
+  const moveDown = (uid) => {
+    const idx = questions.findIndex((q) => q.uid === uid);
+    if (idx < 0 || idx >= questions.length - 1) return;
+    const q = questions[idx];
+    const next = questions[idx + 1];
+    if (next.domain !== q.domain) return;
+    const arr = [...questions];
+    arr[idx + 1] = q;
+    arr[idx] = next;
+    persist(arr);
+  };
+
+  const doReset = () => {
+    if (!confirm("Reset all questions to the original catalog? This cannot be undone.")) return;
+    resetQuestions();
+    setQuestionsState(getActiveQuestions());
+  };
+
+  // Size checkbox toggle
+  const toggleSize = (size) => {
+    const s = draft.sizes || [];
+    setDraft({ ...draft, sizes: s.includes(size) ? s.filter((x) => x !== size) : [...s, size] });
+  };
+
+  return (
+    <div className="step">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Question Management</h2>
+        <MiniBtn danger onClick={doReset}>
+          <i className="fa-solid fa-rotate-left" style={{ marginRight: 4 }} />Reset to Defaults
+        </MiniBtn>
+      </div>
+
+      {/* Domain filter tabs */}
+      <div className="qm-tabs">
+        <button className={`qm-tab ${filterDomain === "all" ? "qm-tab--active" : ""}`} onClick={() => setFilterDomain("all")}>All ({questions.length})</button>
+        {DOMAIN_NAMES.map((name, i) => {
+          const count = questions.filter((q) => q.domain === i).length;
+          return <button key={i} className={`qm-tab ${filterDomain === String(i) ? "qm-tab--active" : ""}`} onClick={() => setFilterDomain(String(i))}>{name} ({count})</button>;
+        })}
+      </div>
+
+      {/* Table */}
+      <div style={{ overflowX: "auto" }}>
+        <table className="grid-tbl" style={{ fontSize: 12 }}>
+          <thead>
+            <tr>
+              <th style={{ width: 50 }}>ID</th>
+              <th>Question</th>
+              <th style={{ width: 100 }}>Type</th>
+              <th style={{ width: 80 }}>Sizes</th>
+              <th style={{ width: 60 }}>Mult.</th>
+              <th style={{ width: 120 }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((q) => (
+              <tr key={q.uid}>
+                <td>{q.id}</td>
+                <td title={q.question}>{q.question.length > 80 ? q.question.slice(0, 80) + "..." : q.question}</td>
+                <td><span className={`qm-type ${q.type === "MinimumReq" ? "qm-type--min" : q.type === "ProgressiveReq" ? "qm-type--prog" : ""}`}>{q.type === "MinimumReq" ? "KC" : q.type === "ProgressiveReq" ? "Prog" : "—"}</span></td>
+                <td>{(q.sizes || []).join(", ") || "All"}</td>
+                <td>{q.multiplier}</td>
+                <td className="qm-actions">
+                  <button className="qm-btn" onClick={() => openEdit(q)} title="Edit"><i className="fa-solid fa-pen" /></button>
+                  <button className="qm-btn qm-btn--danger" onClick={() => setConfirmDelete(q.uid)} title="Delete"><i className="fa-solid fa-trash" /></button>
+                  <button className="qm-btn" onClick={() => moveUp(q.uid)} title="Move up"><i className="fa-solid fa-arrow-up" /></button>
+                  <button className="qm-btn" onClick={() => moveDown(q.uid)} title="Move down"><i className="fa-solid fa-arrow-down" /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Add button */}
+      <div style={{ marginTop: 12 }}>
+        <MiniBtn onClick={openAdd}>
+          <i className="fa-solid fa-plus" style={{ marginRight: 4 }} />Add Question
+        </MiniBtn>
+      </div>
+
+      {/* Confirm delete dialog */}
+      {confirmDelete != null ? (
+        <div className="qm-overlay">
+          <div className="qm-dialog">
+            <p style={{ margin: "0 0 16px", fontSize: 14 }}>Delete question <strong>{(questions.find((q) => q.uid === confirmDelete) || {}).id}</strong>?</p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button className="btn btn--outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
+              <button className="btn btn--danger" onClick={doDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Edit/Add Drawer */}
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title={editUid != null ? "Edit Question" : "Add Question"}
+        width={480}
+        footer={<DrawerFooter onSave={saveDrawer} onCancel={() => setDrawerOpen(false)} saveLabel={editUid != null ? "Save" : "Add"} />}
+      >
+        <DrawerForm cols={1}>
+          <FilledField label="Domain">
+            <FilledSelect
+              value={String(draft.domain)}
+              onChange={(v) => setDraft({ ...draft, domain: Number(v) })}
+              options={DOMAIN_NAMES.map((n, i) => ({ value: String(i), label: n }))}
+              placeholder="Select domain"
+            />
+          </FilledField>
+          <FilledField label="ID">
+            <input className="finput__el" value={draft.id} onChange={(e) => setDraft({ ...draft, id: e.target.value })} placeholder="e.g. 3.6" />
+          </FilledField>
+          <FilledField label="Question">
+            <textarea className="finput__el" rows={4} value={draft.question} onChange={(e) => setDraft({ ...draft, question: e.target.value })} placeholder="Enter question text" />
+          </FilledField>
+          <FilledField label="Type">
+            <FilledSelect
+              value={draft.type}
+              onChange={(v) => setDraft({ ...draft, type: v })}
+              options={["MinimumReq", "ProgressiveReq", ""]}
+              placeholder="None"
+            />
+          </FilledField>
+          <FilledField label="Sizes (leave empty for All)">
+            <div style={{ display: "flex", gap: 12 }}>
+              {["S", "M", "L", "XL"].map((s) => (
+                <label key={s} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, cursor: "pointer" }}>
+                  <input type="checkbox" checked={(draft.sizes || []).includes(s)} onChange={() => toggleSize(s)} />
+                  {s}
+                </label>
+              ))}
+            </div>
+          </FilledField>
+          <FilledField label="Multiplier">
+            <FilledNumber value={draft.multiplier} onChange={(v) => setDraft({ ...draft, multiplier: v })} placeholder="1.0" />
+          </FilledField>
+          <FilledField label="OT Question">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input type="checkbox" checked={draft.isOT} onChange={() => setDraft({ ...draft, isOT: !draft.isOT })} />
+              <span style={{ fontSize: 13 }}>Yes, this is an OT-related question</span>
+            </div>
+          </FilledField>
+        </DrawerForm>
+      </Drawer>
+    </div>
+  );
+}
